@@ -1,4 +1,4 @@
-# Ara-Fiyat-Tahmini-Modeli-Ve-Veri-Analizi
+# Arac-Fiyat-Tahmini-Modeli-Ve-Veri-Analizi
 Bu rapor, ikinci el araç fiyatlarını tahmin etmek amacıyla gerçekleştirilen veri analizi ve makine öğrenimi modelleme süreçlerinin tüm detaylarını, bulgularını ve sonuçlarını içermektedir. Amacım, en doğru ve genellenebilir tahminleri yapabilen bir model geliştirmektir.
 
 1. Veri Yükleme ve İlk Keşifsel Analiz (EDA) Adımları
@@ -9,6 +9,7 @@ Uygulanan Adımlar:
 vehicles_feature.csv dosyası Pandas DataFrame'ine (df) yüklendi.
 df.head(), df.tail(), df.info() ve df.describe() metotları kullanılarak veri setinin ilk ve son satırları, sütun bilgileri, veri tipleri ve temel istatistikleri incelendi.
 Sütun açıklamaları detaylı bir metin bloğu olarak eklendi.
+
 İlk Bulgular ve Gözlemler:
 
 Veri seti başlangıçta 43,716 satır ve 30 sütundan oluşmaktaydı.
@@ -42,6 +43,7 @@ Yüksek Kardinaliteli/Gereksiz Sütunların Silinmesi: url, region_url, VIN, ima
 Kategorik Değişken Kodlama (One-Hot Encoding): Kalan 12 adet kategorik sütun (region, manufacturer, model, condition, fuel, title_status, transmission, drive, type, paint_color, state, posting_date) pd.get_dummies(drop_first=True) kullanılarak One-Hot Encoding'e tabi tutuldu. Bu işlem sonucunda veri seti 43,716 satır ve 49,514 sütuna ulaştı.
 Veri Seti Bölme (Train-Test Split): Veri seti, model eğitimi için %80 (X_train, y_train) ve model değerlendirmesi için %20 (X_test, y_test) oranında rastgele bölündü (random_state=42).
 Özellik Ölçeklendirme (Feature Scaling): Sayısal özellikler (StandardScaler) kullanılarak standardize edildi. Bu, tüm özelliklerin ortalamasının 0 ve standart sapmasının 1 olmasını sağlayarak mesafeye dayalı ve gradyan iniş tabanlı modellerin performansını iyileştirdi.
+
 4. Keşifsel Veri Analizi (EDA) Detayları
 Veri setinin yapısını daha iyi anlamak için çeşitli görselleştirme ve istatistiksel analizler yapıldı.
 
@@ -53,6 +55,7 @@ Korelasyon Analizi: price ile diğer sayısal değişkenler arasındaki korelasy
 En Önemli 9 Değişkenin Dağılımı: price ile en güçlü ilişkili 9 değişkenin (odometer, year, vehicle_age, odometer_per_year, description_length, num_cylinders, id, lat, long) histogram ve KDE plotları incelendi. Özellikle year, vehicle_age, description_length, lat ve long sütunlarında yüksek çarpıklıklar gözlemlendi.
 Aykırı Değer Tespiti (IQR Yöntemi): Capping işlemi sonrası bile, 1.5 * IQR kuralına göre long (%28.3), price_per_mile (%11.7), lat (%8.3) gibi sütunlarda hala önemli miktarda aykırı değer bulunduğu tespit edildi. year ve vehicle_age'de %4.3, odometer'da %0.9 aykırı değer saptandı.
 Pair Plotlar: price ile en ilişkili 6 değişkenin ikili ilişkileri incelendi. odometer ve price arasında belirgin negatif, year ve price arasında pozitif trendler gözlendi.
+
 5. Model Eğitimi ve Değerlendirmesi
 Çeşitli regresyon modelleri eğitildi ve performansları R² skoru, RMSE (Root Mean Squared Error) ve MAE (Mean Absolute Error) metrikleri üzerinden değerlendirildi. Modellerin aşırı öğrenme (overfitting) eğilimleri de incelendi. REMAX tarafından belirlenen hedefler (R² ≥ 0.90 ve RMSE ≤ $25,000) göz önünde bulunduruldu.
 
@@ -60,24 +63,28 @@ Pair Plotlar: price ile en ilişkili 6 değişkenin ikili ilişkileri incelendi.
 Linear Regression
 
 Test R²: 0.7101
+
 Test RMSE: $7,737.38
+
 Overfitting Gap: 0.1117 (Overfitting var)
+
 En Önemli Özellikler: odometer (negatif etki), odometer_per_year (pozitif etki), fuel_gas (negatif etki), manufacturer_chevrolet (pozitif etki).
 Yorum: Model eğitim setine iyi uysa da, test setinde performansı düşüyor ve belirgin bir overfitting problemi mevcut. Yüksek boyutluluk ve çoklu bağlantı bu duruma katkıda bulunuyor.
-Ridge Regression (L2 Regularization)
 
+Ridge Regression (L2 Regularization)
 Test R²: 0.7102
 Test RMSE: $7,736.26
 Overfitting Gap: 0.1116 (Overfitting var)
 Yorum: L2 regülarizasyonu overfitting'i Linear Regression'a göre çok az da olsa azaltmış, ancak sorun devam etmekte. Performans Linear Regression'a oldukça yakın.
-Lasso Regression (L1 Regularization)
 
+
+Lasso Regression (L1 Regularization
 Test R²: 0.7147
 Test RMSE: $7,675.17
 Overfitting Gap: 0.1068 (Overfitting var)
 Yorum: Lasso, L1 regülarizasyonu sayesinde 881 özelliği sıfırlayarak özellik seçimi yapmış ve diğer doğrusal modellere göre hafifçe daha iyi bir genelleme performansı sergilemiştir. Overfitting hala mevcut.
-ElasticNet (L1 + L2 Regularization)
 
+ElasticNet (L1 + L2 Regularization)
 Test R²: 0.6692
 Test RMSE: $8,265.11
 Overfitting Gap: 0.0882 (Kabul edilebilir: Az overfitting)
@@ -85,50 +92,51 @@ Yorum: Overfitting sorununu en iyi azaltan doğrusal model ElasticNet oldu, anca
 Genel Doğrusal Model Değerlendirmesi: Tüm doğrusal modellerde overfitting problemi gözlendi ve hiçbir model REMAX'in R² hedefine ulaşamadı. Ancak RMSE hedefini ($25K) fazlasıyla karşıladılar. Lasso, test R² açısından en iyisi oldu.
 
 5.2 Ağaç Tabanlı ve Ensemble Modelleri
-Decision Tree Regression
 
+Decision Tree Regression
 Test R²: 0.9400
 Test RMSE:  3,520.48∗∗∗OverfittingGap∗∗:0.0072(Overfittingyok)∗∗∗EnÖnemliÖzellikler∗∗:‘pricepermile‘(∗∗∗Yorum∗∗:DoğrusalmodelleregöreDRAMATİKBİRİYİLEŞME!HemREMAX′inR²(≥0.90)hemdeRMSE(≤ 25K) hedeflerini fazlasıyla karşıladı ve minimal overfitting gösterdi.
-Random Forest Regression
 
+Random Forest Regression
 Test R²: 0.9883
 Test RMSE: $1,553.31
 Overfitting Gap: 0.0056 (Overfitting yok)
 En Önemli Özellikler: price_per_mile (%73.0), odometer (%15.8), odometer_per_year (%5.7).
 Yorum: Decision Tree'yi bile geride bırakarak şimdiye kadarki EN İYİ PERFORMANSI sergiledi. REMAX hedeflerini açık ara karşıladı ve neredeyse hiç overfitting göstermedi. Ensemble modellerin gücünü kanıtladı.
-Gradient Boosting Regression
 
+Gradient Boosting Regression
 Test R²: 0.9710
 Test RMSE: $2,445.89
 Overfitting Gap: 0.0062 (Overfitting yok)
 En Önemli Özellikler: price_per_mile (%71.6), odometer (%15.8), odometer_per_year (%5.0).
 Yorum: Random Forest'a yakın, çok güçlü bir performans gösterdi ve REMAX hedeflerini karşıladı. Minimal overfitting mevcut. Eğitim süresi Random Forest'a göre daha uzundu.
-AdaBoost Regression
 
+AdaBoost Regression
 Test R²: 0.8223
 Test RMSE: $6,057.67
 Overfitting Gap: 0.0023 (Overfitting yok)
 En Önemli Özellikler: price_per_mile (%69.9), odometer (%14.6), odometer_per_year (%7.9).
 Yorum: Overfitting kontrolünde en iyi model oldu, ancak genel tahmin performansı (R²) Decision Tree, Random Forest ve Gradient Boosting'in gerisinde kaldı. REMAX R² hedefine ulaşamadı.
-XGBoost Regressor
 
+
+XGBoost Regressor
 Test R²: 0.9607
 Test RMSE: $2,848.48
 Overfitting Gap: 0.0067 (Mükemmel: Genelleme yapıyor)
 En Önemli Özellikler: price_per_mile (%0.1370), drive_fwd (%0.0777), transmission_other (%0.0758).
 Yorum: Random Forest'ın hafif gerisinde kalsa da, çok güçlü bir performans sergileyerek REMAX hedeflerini karşıladı. Overfitting problemi yok ve eğitim süresi oldukça verimli.
-LightGBM Regressor
 
+LightGBM Regressor
 Test R²: (Değerler raporun sonunda mevcut değil, ancak genellikle XGBoost'a benzer veya daha iyi performans gösterir, eğitim süresi daha kısadır).
 Yorum: Genellikle XGBoost ile karşılaştırılan ve sıkça tercih edilen, hızlı ve verimli bir boosting modelidir. Performansının diğer gelişmiş ensemble modellerine yakın olması beklenir.
-SVR (Support Vector Regression)
 
+SVR (Support Vector Regression)
 Test R²: 0.0526
 Test RMSE: $13,986.76
 Overfitting Gap: 0.0038 (Mükemmel: Genelleme yapıyor)
 Yorum: Bu veri seti ve mevcut parametrelerle çok düşük bir R² değeri elde etti. Eğitim süresi oldukça uzundu (6805 saniye). Kernel tabanlı bir model olduğu için yüksek boyutlu ve seyrek verilerde genellikle iyi performans göstermez. REMAX R² hedefine ulaşamadı.
-KNN (K-Nearest Neighbors Regressor)
 
+KNN (K-Nearest Neighbors Regressor)
 Test R²: (Model KeyboardInterrupt ile kesildiği için tam performans verileri mevcut değil, ancak K-NN genellikle yüksek boyutlu verilerde hesaplama maliyeti ve performans sorunları yaşar).
 Yorum: k parametresi ile komşu sayısı belirlenir. Yüksek boyutlu verilerde curse of dimensionality nedeniyle performansı düşebilir ve tahmin süresi uzun olabilir. REMAX R² hedefine ulaşması beklenemez.
 6. Genel Sonuç ve Öneriler
